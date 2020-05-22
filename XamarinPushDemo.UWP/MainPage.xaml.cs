@@ -8,7 +8,6 @@ namespace XamarinPushDemo.UWP
         {
             this.InitializeComponent();
 
-            App.MainPageInstance = this;
             LoadApplication(new XamarinPushDemo.App(new WindowsPushNotificationHandler()));
         }
     }
