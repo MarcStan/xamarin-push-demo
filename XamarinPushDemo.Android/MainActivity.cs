@@ -1,9 +1,12 @@
 ﻿using Android.App;
+using Android.Content;
 using Android.Content.PM;
+using Android.Gms.Common;
 using Android.OS;
-using XamarinPushDemo.Droid.Services;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
+using XamarinPushDemo.Droid.Services;
 
 namespace XamarinPushDemo.Droid
 {
@@ -22,6 +25,31 @@ namespace XamarinPushDemo.Droid
             Forms.Init(this, savedInstanceState);
 
             LoadApplication(new App(new AndroidPushNotificationHandler(this)));
+
+            if (!IsPlayServiceAvailable())
+            {
+                throw new Exception("This device does not have Google Play Services and cannot receive push notifications.");
+            }
+        }
+
+        protected override void OnNewIntent(Intent intent)
+        {
+            if (intent.Extras != null)
+            {
+                var message = intent.GetStringExtra("message");
+            }
+
+            base.OnNewIntent(intent);
+        }
+
+        bool IsPlayServiceAvailable()
+        {
+            int resultCode = GoogleApiAvailability.Instance.IsGooglePlayServicesAvailable(this);
+            if (resultCode != ConnectionResult.Success)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

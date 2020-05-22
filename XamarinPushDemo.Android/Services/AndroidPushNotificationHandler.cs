@@ -1,11 +1,12 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.OS;
-using Firebase.Iid;
-using XamarinPushDemo.Droid.Services;
-using XamarinPushDemo.Services;
+using System;
 using System.Threading.Tasks;
 using WindowsAzure.Messaging;
+using XamarinPushDemo.Droid.PushNotification;
+using XamarinPushDemo.Droid.Services;
+using XamarinPushDemo.Services;
 
 [assembly: Xamarin.Forms.Dependency(typeof(AndroidPushNotificationHandler))]
 namespace XamarinPushDemo.Droid.Services
@@ -20,19 +21,30 @@ namespace XamarinPushDemo.Droid.Services
             _activity = activity;
         }
 
-        public string Token => FirebaseInstanceId.Instance.Token;
+        public string Token => MessagingService.Token;
 
         public Task InitializeAsync(string notificationHubName, string connectionString)
         {
             _hub = new NotificationHub(notificationHubName, connectionString, _activity);
 
             // Token will be null if platform does not support push notifications (e.g. no google services installed)
-            if (Token != null)
+            if (!string.IsNullOrEmpty(Token))
             {
                 var userVisibleChannelName = "Demo Channel";
                 CreateNotificationChannel(userVisibleChannelName);
                 var payload = GetTemplate();
-                _hub.RegisterTemplate(Token, userVisibleChannelName, payload);
+                return Task.Run(() =>
+                {
+                    try
+                    {
+                        _hub.RegisterTemplate(Token, userVisibleChannelName, payload);
+                        Task.Delay(100);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw;
+                    }
+                });
             }
             return Task.CompletedTask;
         }

@@ -3,6 +3,7 @@ using Android.Content;
 using Android.Support.V4.App;
 using Firebase.Messaging;
 using System.Linq;
+using Xamarin.Essentials;
 
 namespace XamarinPushDemo.Droid.PushNotification
 {
@@ -10,6 +11,14 @@ namespace XamarinPushDemo.Droid.PushNotification
     [IntentFilter(new[] { "com.google.firebase.MESSAGING_EVENT" })]
     public class MessagingService : FirebaseMessagingService
     {
+        public static string Token => Preferences.Get("TOKEN", "");
+
+        public override void OnNewToken(string token)
+        {
+            Preferences.Set("TOKEN", token);
+            base.OnNewToken(token);
+        }
+
         public override void OnMessageReceived(RemoteMessage message)
         {
             // called for every received push notification
